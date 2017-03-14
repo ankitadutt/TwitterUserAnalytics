@@ -1,9 +1,9 @@
-Twitter Log Analysis Library
+#Twitter Log Analysis Library
 
 The code base contains a general-purpose library for Twitter log data analysis.
 The library is used to provide a calculation for average user time.
 
-Approach:
+#Approach:
 The library takes an input log file with data format of the form {userId, timestamp, actionType} and breaks it into multiple shards.
 The number of shards is determined by the number of distinct user(ids) and total available internal memory (both of which are accepted as optional user inputs)
 
@@ -33,7 +33,7 @@ UPDATE_WITH_CURRENT – This policy assumes that the missing entry happened at t
 Alternative Approach:
 As an alternative approach, an implementation of external merge sort can be carried out before aggregating the data to calculate the average for a user.
 
-Assumptions:
+#Assumptions:
 •	Invalid entries such as missing userId or negative timestamps etc. are skipped
 •	The application assumes that any input will always be as per the given format. If not, these entries are skipped.
 •	The distribution of user ids is assumed to be even. Uneven distribution of ids has been handled by producing reshards of shards (this is an I/O expensive operation)
@@ -44,5 +44,5 @@ java -jar TwitterDataMetrics.jar D:/generated.txt 100000 128 IGNORE_MISSING
 java -jar TwitterDataMetrics.jar D:/testTwitter.txt 100000 128 IGNORE_MISSING
 
 
-Testing 
+#Testing 
 The code has been locally tested with a generated user load of 1 million users on 12MB memory
