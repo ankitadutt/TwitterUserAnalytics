@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>AggregatorService.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCoverage analysis of project &quot;TwitterUserAnalytics&quot; (powered by JaCoCo from EclEmma)</a> &gt; <a href="index.source.html" class="el_package">com.twitter.user.analytics.core</a> &gt; <span class="el_source">AggregatorService.java</span></div><h1>AggregatorService.java</h1><pre class="source lang-java linenums">/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.twitter.user.analytics.core;
+
+import java.io.BufferedReader;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Queue;
+
+import com.twitter.user.analytics.Model.AggregateModel;
+import com.twitter.user.analytics.Policy.Policy;
+import com.twitter.user.analytics.util.BufferedReaderIterator;
+import com.twitter.user.analytics.util.FileUtil;
+import com.twitter.user.analytics.util.LogParserUtil;
+import com.twitter.user.analytics.Sharding.IShardingSpillCallback;
+
+/**
+ * Responsible for reading given shard, computes average value for each user present in shard, and
+ * stores aggregated data in map. If number of users is more than memory available, then service calls
+ * the appropriate shard spillage handler
+ */
+public class AggregatorService {
+  /**
+   * Shard spillage handler
+   */
+  private final IShardingSpillCallback shardingSpilllCallbackManager;
+  /**
+   * Map stores aggregated value per user
+   */
+  private final Map&lt;Long, AggregateModel&gt; aggregateMap;
+  /**
+   * Current shard file being processed
+   */
+  private final String shardFile;
+  /**
+   * Policy used for calculating aggregation
+   */
+  private final Policy policy;
+  /**
+   * Total number of users allowed to store in map, based on memory provided
+   */
+  private final long capacity;
+  /**
+   * Reference to current queue from which data is being processed
+   */
+  private final Queue&lt;String&gt; queue;
+
+<span class="fc" id="L51">  public AggregatorService(IShardingSpillCallback callback, String shardFile, Policy policy, Long capacity, Queue&lt;String&gt; queue) {</span>
+<span class="fc" id="L52">    this.shardingSpilllCallbackManager = callback;</span>
+<span class="fc" id="L53">    this.aggregateMap = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L54">    this.shardFile = shardFile;</span>
+<span class="fc" id="L55">    this.policy = policy;</span>
+<span class="fc" id="L56">    this.capacity = capacity;</span>
+<span class="fc" id="L57">    this.queue = queue;</span>
+<span class="fc" id="L58">  }</span>
+
+  /**
+   * Reads given shard file, computes average, and stored output in file.
+   * Calls shard spill manager in case shard needs re-sharding.
+   */
+  public void aggregateData() {
+    AggregateModel aggregateModel;
+    BufferedReaderIterator iter;
+<span class="fc" id="L67">    BufferedReader reader = null;</span>
+    try {
+<span class="fc" id="L69">      reader = FileUtil.openFile(shardFile);</span>
+<span class="fc" id="L70">      iter = new BufferedReaderIterator(reader);</span>
+<span class="fc bfc" id="L71" title="All 2 branches covered.">      for (String line : iter) {</span>
+        try {
+<span class="fc" id="L73">          aggregateModel = LogParserUtil.parseAvgLogFile(line);</span>
+<span class="pc bpc" id="L74" title="1 of 2 branches missed.">          if (aggregateModel == null) {</span>
+<span class="nc" id="L75">            System.err.println(&quot;Skipping line due to parsing error: &quot; + line);</span>
+          }
+          //When the in-memory capacity should not be overloaded, we re-shard the sharded file
+<span class="fc bfc" id="L78" title="All 4 branches covered.">          if (aggregateMap.size() == capacity &amp;&amp; !aggregateMap.containsKey(aggregateModel.getUserId())) {</span>
+            //Request shard re-distribution via callback
+<span class="fc" id="L80">            shardingSpilllCallbackManager.handleSpillage(this.shardFile, line, this.queue);</span>
+          } else {
+<span class="fc" id="L82">            userTickManager(aggregateModel);</span>
+          }
+<span class="nc" id="L84">        } catch (Exception e) {</span>
+<span class="nc" id="L85">          System.err.println(&quot;Skipping line due to parsing error for line: &quot; + line);</span>
+<span class="nc" id="L86">          System.err.println(e.getMessage());</span>
+<span class="fc" id="L87">        }</span>
+<span class="fc" id="L88">      }</span>
+      // Write output to file
+<span class="fc" id="L90">      FileUtil.createOutputFile(null, aggregateMap);</span>
+<span class="nc" id="L91">    } catch (Exception ex) {</span>
+<span class="nc" id="L92">      System.out.println(&quot;Unable to process data for file - &quot; + shardFile);</span>
+    } finally {
+<span class="pc" id="L94">      FileUtil.closeFile(reader);</span>
+<span class="pc" id="L95">    }</span>
+<span class="fc" id="L96">  }</span>
+
+  /**
+   * Computes average value for user, based on provided policy
+   * All the aggregated value is stored in hashmap
+   */
+  private void userTickManager(AggregateModel log) {
+<span class="pc bpc" id="L103" title="1 of 2 branches missed.">    if (log == null) {</span>
+<span class="nc" id="L104">      return;</span>
+    }
+    AggregateModel newModel;
+    try {
+<span class="fc bfc" id="L108" title="All 2 branches covered.">      if (!aggregateMap.containsKey(log.getUserId())) {</span>
+        //First log entry for userid
+<span class="fc" id="L110">        aggregateMap.put(log.getUserId(), log);</span>
+<span class="fc" id="L111">        return;</span>
+      }
+<span class="fc" id="L113">      newModel = policy.applyPolicy(aggregateMap.get(log.getUserId()), log);</span>
+<span class="fc" id="L114">      newModel.setUserId(log.getUserId());</span>
+<span class="fc" id="L115">      System.out.println(newModel.toString());</span>
+<span class="fc" id="L116">      aggregateMap.put(newModel.getUserId(), newModel);</span>
+<span class="nc" id="L117">    } catch (Exception ex) {</span>
+<span class="nc" id="L118">      System.out.println(&quot;Error updating data in map &quot; + ex.getMessage());</span>
+<span class="fc" id="L119">    }</span>
+<span class="fc" id="L120">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

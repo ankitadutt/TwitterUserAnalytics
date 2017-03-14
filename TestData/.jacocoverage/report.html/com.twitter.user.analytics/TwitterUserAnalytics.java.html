@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>TwitterUserAnalytics.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCoverage analysis of project &quot;TwitterUserAnalytics&quot; (powered by JaCoCo from EclEmma)</a> &gt; <a href="index.source.html" class="el_package">com.twitter.user.analytics</a> &gt; <span class="el_source">TwitterUserAnalytics.java</span></div><h1>TwitterUserAnalytics.java</h1><pre class="source lang-java linenums">/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.twitter.user.analytics;
+
+import com.twitter.user.analytics.core.AggregatorService;
+import com.twitter.user.analytics.Policy.IgnoreMissingPolicy;
+import com.twitter.user.analytics.Policy.Policy;
+import com.twitter.user.analytics.Policy.UpdateWithCurrentPolicy;
+import com.twitter.user.analytics.Sharding.AverageShardingSpillCallback;
+import com.twitter.user.analytics.Sharding.ShardingService;
+import com.twitter.user.analytics.util.Constants;
+import com.twitter.user.analytics.util.MemoryUtil;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+import com.twitter.user.analytics.Sharding.IShardingSpillCallback;
+
+<span class="nc" id="L22">public class TwitterUserAnalytics {</span>
+
+  private static String INPUT_FILE;
+  private static Long MAX_USERS;
+  private static Long MEMORY;
+  private static int SHARDS;
+  private static String POLICY;
+  private static Long ALLOC_PER_SHARD;
+
+  /**
+   * Setting default values
+   *
+   * @codeCoverageIgnore
+   */
+   
+  static {
+<span class="nc" id="L38">    MAX_USERS = Constants.MAX_NUMBER_OF_USERS;</span>
+<span class="nc" id="L39">    MEMORY = Constants.MAX_MEMORY_IN_MB;</span>
+<span class="nc" id="L40">    POLICY = Constants.DEFAULT_POLICY;</span>
+<span class="nc" id="L41">  }</span>
+
+  /**
+    * @codeCoverageIgnore
+    */
+  public static void main(String[] args) {
+<span class="nc" id="L47">    handleInput(args);</span>
+
+    try {
+<span class="nc" id="L50">      ShardingService ss = ShardingService.getInstance();</span>
+<span class="nc" id="L51">      List&lt;String&gt; shardFiles = ss.createShards(INPUT_FILE, SHARDS);</span>
+
+      //Loop until all shards have been processed
+<span class="nc" id="L54">      Queue&lt;String&gt; fileToBeProcessedQueue = new LinkedList&lt;&gt;();</span>
+<span class="nc" id="L55">      fileToBeProcessedQueue.addAll(shardFiles);</span>
+
+      AggregatorService avgAggregationService;
+
+      //AverageShardingSpillCallback handles sharding re-distribution cases when shard is too big to fit in memory
+<span class="nc" id="L60">      IShardingSpillCallback callback = new AverageShardingSpillCallback();</span>
+
+      //Instantiate appropriate policy
+<span class="nc" id="L63">      Policy policy = handlePolicy(POLICY);</span>
+<span class="nc bnc" id="L64" title="All 2 branches missed.">      while (fileToBeProcessedQueue.size() &gt; 0) {</span>
+<span class="nc" id="L65">        String fileToBeProcessed = fileToBeProcessedQueue.poll();</span>
+<span class="nc" id="L66">        System.out.println(&quot;Processing file: &quot; + fileToBeProcessed);</span>
+<span class="nc" id="L67">        avgAggregationService = new AggregatorService(callback, fileToBeProcessed, policy, ALLOC_PER_SHARD , fileToBeProcessedQueue);</span>
+<span class="nc" id="L68">        avgAggregationService.aggregateData();</span>
+        //Closing any re-sharded file if created
+<span class="nc" id="L70">        ShardingService.getInstance().closeReShardFile(fileToBeProcessed);</span>
+<span class="nc" id="L71">      }</span>
+<span class="nc" id="L72">    } catch (Exception e) {</span>
+<span class="nc" id="L73">      System.err.print(&quot;Error while processing: &quot; + e.getMessage());</span>
+<span class="nc" id="L74">      e.printStackTrace();</span>
+    } finally {
+<span class="nc" id="L76">      System.out.println(&quot;Exiting application...&quot;);</span>
+<span class="nc" id="L77">    }</span>
+<span class="nc" id="L78">  }</span>
+
+  /**
+   * Handle user entered input values
+   *
+   * @codeCoverageIgnore
+  */
+ 
+  private static void handleInput(String args[]) {
+<span class="nc bnc" id="L87" title="All 2 branches missed.">    if (args.length &lt; 1) {</span>
+<span class="nc" id="L88">      throw new IllegalArgumentException(&quot;Please specify input file path. Optional params: Users, memory (in MB) and policy. \n Example: {input param} 100 10 IGNORE_MISSING&quot;);</span>
+    }
+<span class="nc" id="L90">    INPUT_FILE = args[0].trim();</span>
+    try {
+<span class="nc bnc" id="L92" title="All 2 branches missed.">      if (args.length &gt;= 2) {</span>
+<span class="nc" id="L93">        MAX_USERS = Long.parseLong(args[1].trim());</span>
+      }
+<span class="nc bnc" id="L95" title="All 2 branches missed.">      if (args.length &gt;= 3) {</span>
+<span class="nc" id="L96">        MEMORY = Long.parseLong(args[2].trim());</span>
+      }
+<span class="nc bnc" id="L98" title="All 2 branches missed.">      if (args.length &gt;= 4) {</span>
+<span class="nc" id="L99">        POLICY = args[3].trim();</span>
+      }
+<span class="nc" id="L101">      SHARDS = MemoryUtil.calculateNumberOfShards(MAX_USERS, MEMORY);</span>
+<span class="nc bnc" id="L102" title="All 2 branches missed.">      if (SHARDS != 0) {</span>
+<span class="nc" id="L103">        ALLOC_PER_SHARD = MAX_USERS / SHARDS;</span>
+      }
+
+      //Testing
+      //SHARDS = 2;
+      //ALLOC_PER_SHARD = 2L;
+
+<span class="nc" id="L110">      System.out.println(&quot;Max-Users = &quot; + MAX_USERS);</span>
+<span class="nc" id="L111">      System.out.println(&quot;Memory Available (MB)= &quot; + MEMORY);</span>
+<span class="nc" id="L112">      System.out.println(&quot;Policy = &quot; + POLICY);</span>
+<span class="nc" id="L113">      System.out.println(&quot;Shards = &quot; + SHARDS);</span>
+<span class="nc" id="L114">      System.out.println(&quot;ALLOC_PER_SHARD = &quot; + ALLOC_PER_SHARD);</span>
+<span class="nc" id="L115">    } catch (Exception e) {</span>
+<span class="nc" id="L116">      throw new RuntimeException(&quot;Unable to initialize system properties. Please check input values provided! Error: &quot; + e.getMessage());</span>
+<span class="nc" id="L117">    }</span>
+<span class="nc" id="L118">  }</span>
+
+    /**
+     * @codeCoverageIgnore
+    */
+  private static Policy handlePolicy(String policyName) {
+<span class="nc bnc" id="L124" title="All 6 branches missed.">    if (policyName == null || policyName.trim().isEmpty() || policyName.equalsIgnoreCase(Constants.DEFAULT_POLICY)) {</span>
+<span class="nc" id="L125">      return new IgnoreMissingPolicy();</span>
+<span class="nc bnc" id="L126" title="All 2 branches missed.">    } else if (policyName.equalsIgnoreCase(Constants.POLICY2)) {</span>
+<span class="nc" id="L127">      return new UpdateWithCurrentPolicy();</span>
+    }
+<span class="nc" id="L129">    return new IgnoreMissingPolicy();</span>
+  }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

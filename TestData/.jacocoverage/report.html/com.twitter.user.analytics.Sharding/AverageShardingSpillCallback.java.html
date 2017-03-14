@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>AverageShardingSpillCallback.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCoverage analysis of project &quot;TwitterUserAnalytics&quot; (powered by JaCoCo from EclEmma)</a> &gt; <a href="index.source.html" class="el_package">com.twitter.user.analytics.Sharding</a> &gt; <span class="el_source">AverageShardingSpillCallback.java</span></div><h1>AverageShardingSpillCallback.java</h1><pre class="source lang-java linenums">package com.twitter.user.analytics.Sharding;
+
+import java.io.IOException;
+import java.util.Queue;
+
+/**
+ * Concrete implementation of handling spillage use cases while reading user activity file
+ */
+<span class="fc" id="L9">public class AverageShardingSpillCallback implements IShardingSpillCallback {</span>
+
+  @Override
+  public void handleSpillage(String currentShard, String line, Queue&lt;String&gt; queue) throws IOException {
+<span class="fc" id="L13">    ShardingService obj = ShardingService.getInstance();</span>
+<span class="fc bfc" id="L14" title="All 2 branches covered.">    if (!obj.isReshardedCreated(currentShard)) {</span>
+<span class="fc" id="L15">      obj.writeToReshardFile(currentShard, line);</span>
+      // If re-shard file is successfully created, only then we add file to queue. In case of error
+      // file is not added to queue for processing.
+<span class="fc" id="L18">      System.out.println(&quot;Adding new shard for processing: &quot; + obj.getReshardfileName(currentShard));</span>
+<span class="fc" id="L19">      queue.offer(obj.getReshardfileName(currentShard));</span>
+<span class="fc" id="L20">      return;</span>
+    }
+<span class="fc" id="L22">    obj.writeToReshardFile(currentShard, line);</span>
+<span class="fc" id="L23">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

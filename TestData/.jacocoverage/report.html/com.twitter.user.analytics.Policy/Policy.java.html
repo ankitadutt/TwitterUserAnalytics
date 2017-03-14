@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>Policy.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCoverage analysis of project &quot;TwitterUserAnalytics&quot; (powered by JaCoCo from EclEmma)</a> &gt; <a href="index.source.html" class="el_package">com.twitter.user.analytics.Policy</a> &gt; <span class="el_source">Policy.java</span></div><h1>Policy.java</h1><pre class="source lang-java linenums">package com.twitter.user.analytics.Policy;
+
+import com.twitter.user.analytics.core.CalculatorService;
+import com.twitter.user.analytics.Model.AggregateModel;
+
+/**
+ * Abstract class for defining policy for handling various operation types.
+ * Provides implementation for certain open/close cases.
+ */
+<span class="fc" id="L10">public abstract class Policy {</span>
+  abstract public AggregateModel applyPolicy(AggregateModel prevLog, AggregateModel currLog);
+
+  /**
+   * Provides implementation for handling open-close tick pair.
+   */
+  protected AggregateModel handleOpenCloseTick(AggregateModel prevLog, AggregateModel currLog) {
+<span class="fc" id="L17">    AggregateModel newModel = new AggregateModel();</span>
+<span class="fc" id="L18">    Long newDuration = CalculatorService.calculateDuration(prevLog, currLog) + prevLog.getTotalDuration();</span>
+<span class="pc bpc" id="L19" title="1 of 2 branches missed.">    if (newDuration == -1) {</span>
+<span class="nc" id="L20">      newDuration = prevLog.getTotalDuration(); //ignore the wrong entry</span>
+    }
+<span class="fc" id="L22">    Long entries = prevLog.getTotalEntries() + 1;</span>
+<span class="fc" id="L23">    newModel.setTotalDuration(newDuration);</span>
+<span class="fc" id="L24">    newModel.setTotalEntries(entries);</span>
+<span class="fc" id="L25">    newModel.setTimestamp(currLog.getTimestamp());</span>
+<span class="fc" id="L26">    newModel.setOperationType(currLog.getOperationType());</span>
+<span class="fc" id="L27">    return newModel;</span>
+  }
+
+
+  /**
+   * Provides implementation for handling close-open tick pair.
+   */
+  protected AggregateModel handleCloseOpenTick(AggregateModel prevLog, AggregateModel currLog) {
+<span class="fc" id="L35">    AggregateModel newModel = new AggregateModel();</span>
+<span class="fc" id="L36">    newModel.setTotalDuration(prevLog.getTotalDuration());</span>
+<span class="fc" id="L37">    newModel.setTotalEntries(prevLog.getTotalEntries());</span>
+<span class="fc" id="L38">    newModel.setTimestamp(currLog.getTimestamp());</span>
+<span class="fc" id="L39">    newModel.setOperationType(currLog.getOperationType());</span>
+<span class="fc" id="L40">    return newModel;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

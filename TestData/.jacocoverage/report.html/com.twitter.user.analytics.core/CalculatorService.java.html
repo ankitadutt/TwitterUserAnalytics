@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>CalculatorService.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCoverage analysis of project &quot;TwitterUserAnalytics&quot; (powered by JaCoCo from EclEmma)</a> &gt; <a href="index.source.html" class="el_package">com.twitter.user.analytics.core</a> &gt; <span class="el_source">CalculatorService.java</span></div><h1>CalculatorService.java</h1><pre class="source lang-java linenums">/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.twitter.user.analytics.core;
+
+import com.twitter.user.analytics.Model.AggregateModel;
+
+<span class="nc" id="L10">public class CalculatorService {</span>
+
+    /**
+     * Maintains a list of all file names and runs the aggregation on each file to calculate the output
+     * @param oldModel previous tick value from log.
+     * @param newModel new tick value from log.
+     * @return duration value between 2 ticks
+     */
+    public static long calculateDuration(AggregateModel oldModel, AggregateModel newModel) {
+<span class="fc" id="L19">        Long duration = 0L;</span>
+<span class="pc bpc" id="L20" title="1 of 4 branches missed.">        if (oldModel == null || newModel == null) {</span>
+<span class="fc" id="L21">            return -1L;</span>
+        }
+        try {
+<span class="fc" id="L24">            Long closeTick = newModel.getTimestamp();</span>
+<span class="fc" id="L25">            Long openTick = oldModel.getTimestamp();</span>
+<span class="fc" id="L26">            duration = closeTick - openTick;</span>
+<span class="nc" id="L27">        } catch (Exception ex) {</span>
+<span class="nc" id="L28">            System.out.println(&quot;Error calculating duration for the user &quot; + ex.getMessage());</span>
+<span class="fc" id="L29">        }</span>
+<span class="fc" id="L30">        return duration;</span>
+    }
+
+    /**
+     * Calculates average value for a given AggregateModel instance
+     * @param model
+     * @return new average value
+     */
+    public static double calculateAverage(AggregateModel model) {
+<span class="fc" id="L39">        double avg = 0;</span>
+        try {
+<span class="fc bfc" id="L41" title="All 2 branches covered.">            if (model.getTotalEntries() == 0) {</span>
+<span class="fc" id="L42">                avg = model.getTotalDuration();</span>
+            } else {
+<span class="fc" id="L44">                avg = model.getTotalDuration() / model.getTotalEntries();</span>
+            }
+<span class="nc" id="L46">        } catch (Exception ex) {</span>
+<span class="nc" id="L47">            System.err.println(&quot;Error calculating average &quot; + ex.getMessage());</span>
+<span class="fc" id="L48">        }</span>
+<span class="fc" id="L49">        return avg;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

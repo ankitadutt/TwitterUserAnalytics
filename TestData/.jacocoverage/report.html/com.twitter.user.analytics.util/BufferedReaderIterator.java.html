@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>BufferedReaderIterator.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCoverage analysis of project &quot;TwitterUserAnalytics&quot; (powered by JaCoCo from EclEmma)</a> &gt; <a href="index.source.html" class="el_package">com.twitter.user.analytics.util</a> &gt; <span class="el_source">BufferedReaderIterator.java</span></div><h1>BufferedReaderIterator.java</h1><pre class="source lang-java linenums">/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.twitter.user.analytics.util;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.Iterator;
+
+public class BufferedReaderIterator implements Iterable&lt;String&gt; {
+
+  private static final int MAX_CHARS = 50;
+  private BufferedReader r;
+
+<span class="fc" id="L17">  public BufferedReaderIterator(BufferedReader r) {</span>
+<span class="fc" id="L18">    this.r = r;</span>
+<span class="fc" id="L19">  }</span>
+
+  @Override
+  public Iterator&lt;String&gt; iterator() {
+<span class="fc" id="L23">    return new Iterator&lt;String&gt;() {</span>
+
+      @Override
+      public boolean hasNext() {
+        try {
+<span class="fc" id="L28">          r.mark(MAX_CHARS);</span>
+<span class="fc bfc" id="L29" title="All 2 branches covered.">          if (r.read() &lt; 0) {</span>
+<span class="fc" id="L30">            return false;</span>
+          }
+<span class="fc" id="L32">          r.reset();</span>
+<span class="fc" id="L33">          return true;</span>
+<span class="nc" id="L34">        } catch (IOException e) {</span>
+<span class="nc" id="L35">          e.printStackTrace();</span>
+<span class="nc" id="L36">          return false;</span>
+        }
+      }
+
+      @Override
+      public String next() {
+        try {
+<span class="fc" id="L43">          return r.readLine();</span>
+<span class="nc" id="L44">        } catch (IOException e) {</span>
+<span class="nc" id="L45">          e.printStackTrace();</span>
+<span class="nc" id="L46">          return null;</span>
+        }
+      }
+
+      @Override
+      public void remove() {
+<span class="nc" id="L52">        throw new UnsupportedOperationException();</span>
+      }
+
+    };
+  }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../.resources/report.gif" type="image/gif"/><title>Constants.java</title><link rel="stylesheet" href="../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../.sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JaCoCoverage analysis of project &quot;TwitterUserAnalytics&quot; (powered by JaCoCo from EclEmma)</a> &gt; <a href="index.source.html" class="el_package">com.twitter.user.analytics.util</a> &gt; <span class="el_source">Constants.java</span></div><h1>Constants.java</h1><pre class="source lang-java linenums">/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.twitter.user.analytics.util;
+
+<span class="nc" id="L8">public class Constants {</span>
+    //Memory Configuration
+    public static final long MAX_MEMORY_IN_MB = 15;//500;
+    public static final long MAX_NUMBER_OF_USERS = 10;//100000;
+    public static final int NUM_SHARDS = 5;
+    public static final int MAX_MEMORY_PER_USER_RECORD_IN_BYTES = 80; //bytes value
+
+    // File Paths
+    public static final String OUTPUT_FILE=&quot;MetricsOutput.txt&quot;;
+    public static final String OUTPUT_PATH=&quot;/tmp/test/&quot;;
+    public static final String SHARD_OUTPUT_PATH=&quot;/tmp/test/&quot;;
+
+    //Policy
+    public static final String DEFAULT_POLICY= &quot;IGNORE_MISSING&quot;;
+    public static final String POLICY2 = &quot;UPDATE_WITH_CURRENT&quot;;
+
+    //Others
+    public static final String SEPARATOR = &quot;,&quot;;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.5.201505241946</span></div></body></html>
