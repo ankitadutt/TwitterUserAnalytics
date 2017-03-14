@@ -1,9 +1,9 @@
-#Twitter Log Analysis Library
+#$Twitter Log Analysis Library
 
 The code base contains a general-purpose library for Twitter log data analysis.
 The library is used to provide a calculation for average user time.
 
-#Approach:
+###Approach:
 The library takes an input log file with data format of the form {userId, timestamp, actionType} and breaks it into multiple shards.
 The number of shards is determined by the number of distinct user(ids) and total available internal memory (both of which are accepted as optional user inputs)
 
